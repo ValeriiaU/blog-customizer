@@ -19,14 +19,6 @@ const App = () => {
 	const [articleState, setArticleState] =
 		useState<ArticleStateType>(defaultArticleState);
 
-	const resetArticle = () => {
-		setArticleState(defaultArticleState);
-	};
-
-	const addArticle = (obj: ArticleStateType) => {
-		setArticleState(obj);
-	};
-
 	return (
 		<main
 			className={clsx(styles.main)}
@@ -39,7 +31,7 @@ const App = () => {
 					'--bg-color': articleState.backgroundColor.value,
 				} as CSSProperties
 			}>
-			<ArticleParamsForm resetForm={resetArticle} submit={addArticle} />
+			<ArticleParamsForm setState={setArticleState} />
 			<Article />
 		</main>
 	);

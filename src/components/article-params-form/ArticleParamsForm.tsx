@@ -14,18 +14,24 @@ import {
 } from '../../constants/articleProps';
 
 import styles from './ArticleParamsForm.module.scss';
-import { useState, SyntheticEvent } from 'react';
+import { useState, SyntheticEvent, useEffect, useRef } from 'react';
 import { RadioGroup } from 'src/ui/radio-group';
 import { Separator } from '../../ui/separator/Separator';
 import { Text } from '../../ui/text/Text';
 
 type ArticleStateTypeProps = {
-	resetForm: () => void;
-	submit: (obj: ArticleStateType) => void;
+	setState: React.Dispatch<
+		React.SetStateAction<{
+			fontFamilyOption: OptionType;
+			fontColor: OptionType;
+			backgroundColor: OptionType;
+			contentWidth: OptionType;
+			fontSizeOption: OptionType;
+		}>
+	>;
 };
 
 export const ArticleParamsForm = (props: ArticleStateTypeProps) => {
-	const { resetForm, submit } = props;
 	const [isOpen, setIsOpen] = useState(false);
 	const [selectedFontFamilyOptions, setSelectedFontFamilyOptions] =
 		useState<OptionType>(defaultArticleState.fontFamilyOption);
@@ -42,17 +48,14 @@ export const ArticleParamsForm = (props: ArticleStateTypeProps) => {
 		defaultArticleState.contentWidth
 	);
 
+	const ref = useRef<HTMLFormElement | null>(null);
+
 	const changeFont = (selected: OptionType) => {
 		setSelectedFontFamilyOptions(selected);
 	};
 
 	const OnClick = () => {
 		setIsOpen(!isOpen);
-		changeFont(selectedFontFamilyOptions);
-		changeSize(fontSize);
-		changeFontColor(fontColor);
-		cgangeContentWidth(contentWidth);
-		changeBackgroundColor(backgroundColor);
 	};
 
 	const changeSize = (value: OptionType) => {
@@ -80,11 +83,11 @@ export const ArticleParamsForm = (props: ArticleStateTypeProps) => {
 			contentWidth: contentWidth,
 			fontSizeOption: fontSize,
 		};
-		submit(articleState);
+		props.setState(articleState);
 	};
 
 	const handleReset = () => {
-		resetForm();
+		props.setState(defaultArticleState);
 		changeFont(defaultArticleState.fontFamilyOption);
 		changeSize(defaultArticleState.fontSizeOption);
 		changeFontColor(defaultArticleState.fontColor);
@@ -92,12 +95,25 @@ export const ArticleParamsForm = (props: ArticleStateTypeProps) => {
 		changeBackgroundColor(defaultArticleState.backgroundColor);
 	};
 
+	useEffect(() => {
+		const handleMouse = (evt: MouseEvent) => {
+			if (isOpen && !ref.current?.contains(evt.target as Node)) {
+				setIsOpen(!isOpen);
+			}
+		};
+		document.addEventListener('mousedown', handleMouse);
+
+		return () => {
+			document.removeEventListener('mousedown', handleMouse);
+		};
+	}, [isOpen]);
+
 	return (
 		<>
 			<ArrowButton isOpen={isOpen} onClick={OnClick} />
 			<aside
 				className={clsx(styles.container, { [styles.container_open]: isOpen })}>
-				<form className={styles.form}>
+				<form className={styles.form} ref={ref}>
 					<Text as={'h2'} size={38} weight={800} uppercase={true}>
 						задайте параметры
 					</Text>
